@@ -21,7 +21,10 @@ def detect_fruits(img_path: str) -> Dict[str, int]:
     Dict[str, int]
         Dictionary with quantity of each fruit.
     """
+
+
     img = cv2.imread(img_path, cv2.IMREAD_COLOR)
+
 
     #TODO: Implement detection method.
     
@@ -36,7 +39,8 @@ def detect_fruits(img_path: str) -> Dict[str, int]:
 @click.option('-p', '--data_path', help='Path to data directory')
 @click.option('-o', '--output_file_path', help='Path to output file')
 def main(data_path, output_file_path):
-
+    data_path = "data"
+    output_file_path = "out"
     img_list = glob(f'{data_path}/*.jpg')
 
     results = {}
