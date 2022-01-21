@@ -123,8 +123,8 @@ while key != ord('q'):
     # img_rgb = cv2.bitwise_or(img_rgb, mask)
 
     img = np.hstack((img_org, img_hsv_converted))
-    img = np.hstack((img, img_hsv_converted))
-    cv2.imshow('result', img_rgb)
+    img = np.hstack((img, img_rgb))
+    cv2.imshow('result', img)
     cv2.imshow('img_show', gray_mask)
 
     key = cv2.waitKey(30)
