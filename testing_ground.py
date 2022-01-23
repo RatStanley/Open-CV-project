@@ -82,54 +82,57 @@ rgb_masked = np.dstack((rgb_mod1, rgb_mod2, rgb_mod3))
 size_of_obj_y = 0
 size_of_obj_x = 0
 
+# start_y = 0
+# end_y = 0
+# start_x = 0
+# end_x = 0
+#
+# obj_list = [[]]
+# it = 0
+# # print(gray_mask.shape)
+# for x in range(gray_mask.shape[0]):
+#     for y in range( gray_mask.shape[1]):
+#         if gray_mask[x,y] == 255:
+#             if start_y != 0:
+#                 start_y = y
+#             continue
+#         else:
+#             end_y = y
+#             if end_y - start_y > 2:
+#                 obj_list.append([x,start_y,x,end_y])
+#                 it = it + 1
+#             start_y = 0
+#             end_y = 0
+
+temp = 1
+# print(gray_mask[100,:])
+# for x_cord in range(gray_mask.shape[0]):
 start_y = 0
 end_y = 0
-start_x = 0
-end_x = 0
-
-obj_list = [[]]
-it = 0
-# print(gray_mask.shape)
-for x in range(gray_mask.shape[0]):
-    for y in range( gray_mask.shape[1]):
-        if gray_mask[x,y] == 255:
-            if start_y != 0:
-                start_y = y
-            continue
+x_cord = 300
+list = []
+for y_cord in range(gray_mask.shape[1]):
+    if gray_mask[x_cord,y_cord] == 255:
+        if temp == 1:
+            # gray_mask[x_cord, y_cord] = 99
+            start_y = y_cord
         else:
-            end_y = y
-            if end_y - start_y > 2:
-                obj_list.append([x,start_y,x,end_y])
-                it = it + 1
-            start_y = 0
-            end_y = 0
+            gray_mask[x_cord,y_cord] = temp
+        temp = temp +1
+    else:
+        if temp > 1:
+            # gray_mask[x_cord, y_cord] = 200
+            end_y = y_cord-1
+            list.append([start_y,end_y])
+        temp = 1
+# print(gray_mask[100,:])
+print(list)
+print(gray_mask.shape[1])
+# print(list[0][1])
+print(len(list[:]))
+for x in range(len(list[:])):
     # print(x)
-# print(it)
-# print(obj_list[20000][0])
-# print(obj_list[20000][1])
-# print(obj_list[20000][2])
-# print(obj_list[20000][3])
-# print(obj_list)
-# print(obj_list)
-temp = 1
-print(gray_mask[100,:])
-for x_cord in range(gray_mask.shape[0]):
-    for y_cord in range(gray_mask.shape[1]):
-        if gray_mask[x_cord,y_cord] == 255:
-            if temp == 1:
-                gray_mask[x_cord, y_cord] = 99
-            else:
-                gray_mask[x_cord,y_cord] = temp
-            temp = temp +1
-        else:
-            if temp > 1:
-                gray_mask[x_cord, y_cord] = 200
-            temp = 1
-print(gray_mask[100,:])
-
-# for x in range(1,600):
-#     # print(x)
-#     cv2.line(rgb_masked,(obj_list[x][0],obj_list[x][1]),(obj_list[x][2],obj_list[x][3]),(0, 255, 255),2)
+    cv2.line(rgb_masked,(list[x][0],x_cord),(list[x][1],x_cord),(0, 255, 255),2)
 
 while key != ord('q'):
     # Wait a little (30 ms) for a key press - this is required to refresh the image in our window
