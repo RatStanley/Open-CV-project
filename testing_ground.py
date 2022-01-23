@@ -14,13 +14,11 @@ def empty_callback(value):
     pass
 
 
-
 class Object:
     x_start = 0
     y_start = 0
     x_end = 0
     y_end = 0
-
 
 
 img_org = cv2.imread("data/02.jpg", cv2.IMREAD_COLOR)
@@ -50,7 +48,6 @@ gray = cv2.cvtColor(img_org, cv2.COLOR_RGB2GRAY)
 
 cv2.namedWindow('result')
 
-
 key = ord('a')
 
 ret, H_value = cv2.threshold(H_Orgin, 167, 255, cv2.THRESH_BINARY)
@@ -72,15 +69,14 @@ rgb_mod1 = cv2.bitwise_and(img_show[:, :, 0], gray_mask)
 rgb_mod2 = cv2.bitwise_and(img_show[:, :, 1], gray_mask)
 rgb_mod3 = cv2.bitwise_and(img_show[:, :, 2], gray_mask)
 
-
 rgb_masked = np.dstack((rgb_mod1, rgb_mod2, rgb_mod3))
 # x = 0
 #
 # while x != 1:
 #     cv2.imshow('img_show', rgb_masked)
 #     key = cv2.waitKey(30)
-size_of_obj_y = 0
-size_of_obj_x = 0
+# size_of_obj_y = 0
+# size_of_obj_x = 0
 
 # start_y = 0
 # end_y = 0
@@ -109,30 +105,35 @@ temp = 1
 # for x_cord in range(gray_mask.shape[0]):
 start_y = 0
 end_y = 0
-x_cord = 300
+# x_cord = 300
 list = []
-for y_cord in range(gray_mask.shape[1]):
-    if gray_mask[x_cord,y_cord] == 255:
-        if temp == 1:
-            # gray_mask[x_cord, y_cord] = 99
-            start_y = y_cord
+for x_cord in range(gray_mask.shape[0]):
+    for y_cord in range(gray_mask.shape[1]):
+        if gray_mask[x_cord, y_cord] == 255:
+            if temp == 1:
+                # gray_mask[x_cord, y_cord] = 99
+                start_y = y_cord
+            else:
+                gray_mask[x_cord, y_cord] = temp
+            temp = temp + 1
         else:
-            gray_mask[x_cord,y_cord] = temp
-        temp = temp +1
-    else:
-        if temp > 1:
-            # gray_mask[x_cord, y_cord] = 200
-            end_y = y_cord-1
-            list.append([start_y,end_y])
-        temp = 1
+            if temp > 10:
+                # gray_mask[x_cord, y_cord] = 200
+                end_y = y_cord - 1
+                list.append([x_cord,start_y, end_y])
+            temp = 1
+    temp = 1
 # print(gray_mask[100,:])
-print(list)
-print(gray_mask.shape[1])
+# print(list)
+for it in range(len(list[:])-1):
+    if list[it][0]+1 ==  list[it+1][0]:
+        it+1 #coś trzeba zrobić
+# print(gray_mask.shape[1])
 # print(list[0][1])
-print(len(list[:]))
+# print(len(list[:]))
 for x in range(len(list[:])):
     # print(x)
-    cv2.line(rgb_masked,(list[x][0],x_cord),(list[x][1],x_cord),(0, 255, 255),2)
+    cv2.line(rgb_masked, (list[x][1], list[x][0]), (list[x][2], list[x][0]), (0, 255, 255), 1)
 
 while key != ord('q'):
     # Wait a little (30 ms) for a key press - this is required to refresh the image in our window
@@ -146,8 +147,6 @@ apple = 0
 banana = 0
 orange = 0
 print("test")
-
-
 
 '''
 cv2.namedWindow('img_show')
