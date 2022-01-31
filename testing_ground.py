@@ -70,70 +70,75 @@ rgb_mod2 = cv2.bitwise_and(img_show[:, :, 1], gray_mask)
 rgb_mod3 = cv2.bitwise_and(img_show[:, :, 2], gray_mask)
 
 rgb_masked = np.dstack((rgb_mod1, rgb_mod2, rgb_mod3))
-# x = 0
-#
-# while x != 1:
-#     cv2.imshow('img_show', rgb_masked)
-#     key = cv2.waitKey(30)
-# size_of_obj_y = 0
-# size_of_obj_x = 0
-
-# start_y = 0
-# end_y = 0
-# start_x = 0
-# end_x = 0
-#
-# obj_list = [[]]
-# it = 0
-# # print(gray_mask.shape)
-# for x in range(gray_mask.shape[0]):
-#     for y in range( gray_mask.shape[1]):
-#         if gray_mask[x,y] == 255:
-#             if start_y != 0:
-#                 start_y = y
-#             continue
-#         else:
-#             end_y = y
-#             if end_y - start_y > 2:
-#                 obj_list.append([x,start_y,x,end_y])
-#                 it = it + 1
-#             start_y = 0
-#             end_y = 0
 
 temp = 1
-# print(gray_mask[100,:])
-# for x_cord in range(gray_mask.shape[0]):
+
 start_y = 0
 end_y = 0
-# x_cord = 300
-list = []
+list_y = []
 for x_cord in range(gray_mask.shape[0]):
     for y_cord in range(gray_mask.shape[1]):
         if gray_mask[x_cord, y_cord] == 255:
             if temp == 1:
-                # gray_mask[x_cord, y_cord] = 99
                 start_y = y_cord
-            else:
-                gray_mask[x_cord, y_cord] = temp
             temp = temp + 1
         else:
             if temp > 10:
-                # gray_mask[x_cord, y_cord] = 200
                 end_y = y_cord - 1
-                list.append([x_cord,start_y, end_y])
+                list_y.append([x_cord, start_y, end_y])
             temp = 1
     temp = 1
-# print(gray_mask[100,:])
+
+
+list_x = []
+start_x = 0
+end_x = 0
+temp = 1
+
+for y_cord in range(gray_mask.shape[1]):
+    for x_cord in range(gray_mask.shape[0]):
+        if gray_mask[x_cord, y_cord] == 255:
+            if temp == 1:
+                start_x = x_cord
+            temp = temp + 1
+        else:
+            if temp > 15:
+                end_x = x_cord - 1
+                list_x.append([y_cord, start_x, end_x])
+            temp = 1
+    temp = 1
+print(list_x)
+print(list_y)
+list_in_range = []
+# min_value = 100;
+# max_value = 0;
+# ind = 1
+# # and ((list[i][1] < list[i+1][1]) or (list[i+1][1] < list[i+1][2]))
+# # range_a = range(list[i][1], list[i][2])
+# # range_b = range(list[i][1], list[i][2])
+# for i in range(len(list[:])-1):
+#     if list[i][0] == list[i+1][0]:
+#         ind += 1
+#     else:
+#         list_in_range.append([ind,i - ind+1, list[i][0]])
+#         ind = 1
+#
+# print(list_in_range[4])
 # print(list)
-for it in range(len(list[:])-1):
-    if list[it][0]+1 ==  list[it+1][0]:
-        it+1 #coś trzeba zrobić
-# print(gray_mask.shape[1])
-# print(list[0][1])
-# print(len(list[:]))
-for x in range(len(list[:])):
-    # print(x)
-    cv2.line(rgb_masked, (list[x][1], list[x][0]), (list[x][2], list[x][0]), (0, 255, 255), 1)
+# # print(list[list[:][0] > list[:+1][0]])
+# obj = []
+# for r in range(10):     #range(len(list_in_range[:])):
+#     for l in range(list_in_range[r][0]):
+#         range_a = range(list[r+i][1], list[r+i][2])
+#         range_b = range(list[r+i][1], list[r+i][2])
+#         print(list[r+l])
+
+
+for x in range(len(list_y[:])):
+    cv2.line(rgb_masked, (list_y[x][1], list_y[x][0]), (list_y[x][2], list_y[x][0]), (0, 0, 255), 1)
+
+for x in range(len(list_x[:])):
+    cv2.line(rgb_masked, (list_x[x][0], list_x[x][1]), (list_x[x][0], list_x[x][2]), (255, 0, 0), 1)
 
 while key != ord('q'):
     # Wait a little (30 ms) for a key press - this is required to refresh the image in our window
