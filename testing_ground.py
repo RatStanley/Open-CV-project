@@ -20,33 +20,43 @@ class Object:
     x_end = 0
     y_end = 0
 
+def look_for_any_else(list,var):
+    for x in range(10):
+        if len(list) > (var+10):
+            if list[var][0]+1 == list[var+x+1]:
+                return [True,x]
+            else:
+                break
+    return [False, 1]
 
 
+def look_for_gap(list, var, start_x, max_value, min_value,repetition_list,size_min):
 
-def look_for_gap(list, var, start_x, max_value, min_value,repetition_list):
+    offset_fun = look_for_any_else(list,var)
+    offset = offset_fun[1]
     if not var > len(list[:]) - 2:
-        if   2 > list[var+1][0] - list[var][0]:
+        if  2 > list[var+1][0] - list[var][0]:
             if var > len(list[:]) - 2:
                 return [start_x, list[var][0], min_value, max_value]
-            range_a = range(list[var][1]-30, list[var][2]+30)
-            range_b = range(list[var + 1][1]-40, list[var + 1][2]+40)
+            range_a = range(list[var][1]-size_min, list[var][2]+size_min)
+            range_b = range(list[var + offset][1]-size_min, list[var + offset][2]+size_min)
 
-            if ((list[var][1] in range_b) or (list[var][2] in range_b) or (list[var + 1][1] in range_a) or (
-                    list[var + 1][2] in range_a)):
+            if ((list[var][1] in range_b) or (list[var][2] in range_b) or (list[var + offset][1] in range_a) or (
+                    list[var + offset][2] in range_a)):
                 if list[var][1] < min_value:
                     min_value = list[var][1]
                 if list[var][2] > max_value:
                     max_value = list[var][2]
-                return look_for_gap(list, var + 1, start_x, max_value, min_value)
+                return look_for_gap(list, var + 1+offset, start_x, max_value, min_value,repetition_list,size_min)
             else:
                 return [start_x, list[var][0], min_value, max_value,var]
         else:
             return [start_x, list[var][0], min_value, max_value,var]
     else:
-        return [start_x, list[var][0], min_value, max_value, var]
+        return [start_x, list[var-1][0], min_value, max_value, var]
 
 
-img_org = cv2.imread("data/00.jpg", cv2.IMREAD_COLOR)
+img_org = cv2.imread("data/03.jpg", cv2.IMREAD_COLOR)
 scale = 0.2
 size_of_view = (int(img_org.shape[1] * scale), int(img_org.shape[0] * scale))
 img_org = cv2.resize(img_org, dsize=size_of_view)
@@ -75,9 +85,14 @@ cv2.namedWindow('result')
 
 key = ord('a')
 
-ret, H_value = cv2.threshold(H_Orgin, 167, 255, cv2.THRESH_BINARY)
+# ret, H_value = cv2.threshold(H_Orgin, 167, 255, cv2.THRESH_BINARY)
+# ret, S_value = cv2.threshold(S_Orgin, 104, 255, cv2.THRESH_BINARY)
+# ret, V_value = cv2.threshold(V_Orgin, 211, 255, cv2.THRESH_BINARY)
+
+ret, H_value = cv2.threshold(H_Orgin, 220, 255, cv2.THRESH_BINARY)
 ret, S_value = cv2.threshold(S_Orgin, 104, 255, cv2.THRESH_BINARY)
-ret, V_value = cv2.threshold(V_Orgin, 211, 255, cv2.THRESH_BINARY)
+ret, V_value = cv2.threshold(V_Orgin, 222, 255, cv2.THRESH_BINARY)
+
 
 img_hsv_converted[:, :, 0] = H_value
 img_hsv_converted[:, :, 1] = S_value
@@ -88,6 +103,8 @@ gray_mask = cv2.bitwise_or(gray, H_value)
 gray_mask = cv2.bitwise_or(gray_mask, S_value)
 gray_mask = cv2.bitwise_or(gray_mask, V_value)
 gray_mask[gray_mask != 255] = 0
+
+gray_mask = cv2.medianBlur(gray_mask, 5)
 
 rgb_mod = np.zeros(img_show.shape)
 rgb_mod1 = cv2.bitwise_and(img_show[:, :, 0], gray_mask)
@@ -125,7 +142,7 @@ for y_cord in range(gray_mask.shape[1]):
                 start_x = x_cord
             temp = temp + 1
         else:
-            if temp > 20:
+            if temp > 10:
                 end_x = x_cord - 1
                 list_x.append([y_cord, start_x, end_x])
             temp = 1
@@ -141,25 +158,42 @@ for i in range(len(list_x[:])-1):
     else:
         list_collected_x.append([ind,i - ind+1, list_x[i][0]])
         ind = 1
-print(len(list_collected_x))
+print((list_collected_x))
 print(len(list_x))
-
+# sum = 0
+# for x,y,z in list_collected_x:
+#     sum += x
+# print(sum)
 chce_koniec = 0
 while True:
 
-    for size in range(len(list_x[:])):
-        temp_var = look_for_gap(list_x, size, list_x[size][0], 0, 1000)
+    for size in range(len(list_y[:])):
+        temp_var = look_for_gap(list_y, size, list_y[size][0], 0, 1000,list_collected_x,50)
 
         if temp_var[1] - temp_var[0] > 50 and temp_var[3] - temp_var[2] > 50:
             obj.append(temp_var)
-            del list_x[:obj[-1][4]]
+            del list_y[:obj[-1][4]]
             break
 
     chce_koniec +=1
-    if chce_koniec > len(list_x[:]):
+    if chce_koniec > len(list_y[:]):
         break
+#
+# while True:
+#
+#     for size in range(len(list_x[:])):
+#         temp_var = look_for_gap(list_x, size, list_x[size][0], 0, 1000,list_collected_x,50)
+#
+#         if temp_var[1] - temp_var[0] > 50 and temp_var[3] - temp_var[2] > 50:
+#             obj.append(temp_var)
+#             del list_x[:obj[-1][4]]
+#             break
+#
+#     chce_koniec +=1
+#     if chce_koniec > len(list_x[:]):
+#         break
 
-
+print((obj[:]))
 
 # for cord in range(list_y):
 #     if
@@ -183,19 +217,19 @@ while True:
 #
 #
 # print(list)
-# for x in range(len(list_y[:])):
-#     cv2.line(rgb_masked, (list_y[x][1], list_y[x][0]), (list_y[x][2], list_y[x][0]), (0, 0, 255), 1)
+for x in range(len(list_y[:])):
+    cv2.line(rgb_masked, (list_y[x][1], list_y[x][0]), (list_y[x][2], list_y[x][0]), (0, 0, 255), 1)
 #
-for x in range(len(list_x[:])):
-    cv2.line(rgb_masked, (list_x[x][0], list_x[x][1]), (list_x[x][0], list_x[x][2]), (255, 0, 0), 1)
+# for x in range(len(list_x[:])):
+#     cv2.line(rgb_masked, (list_x[x][0], list_x[x][1]), (list_x[x][0], list_x[x][2]), (255, 0, 0), 1)
 
 # cv2.line(rgb_masked, (list[0][1], list[0][0]), (list[0][2], list[0][0]), (255, 0, 0), 1)
 
-# for i in range(len(obj[:])):
-#     rgb_masked = cv2.rectangle(rgb_masked, (obj[i][3], obj[i][1]), (obj[i][2], obj[i][0]), (0, 255, 0), 2) # dla y
-
 for i in range(len(obj[:])):
-    rgb_masked = cv2.rectangle(rgb_masked, (obj[i][0], obj[i][2]), (obj[i][1], obj[i][3]), (0, 255, 0), 2)
+    rgb_masked = cv2.rectangle(rgb_masked, (obj[i][3], obj[i][1]), (obj[i][2], obj[i][0]), (0, 255, 0), 2) # dla y
+
+# for i in range(len(obj[:])):
+#     rgb_masked = cv2.rectangle(rgb_masked, (obj[i][0], obj[i][2]), (obj[i][1], obj[i][3]), (0, 255, 0), 2)
 
 while key != ord('q'):
     # Wait a little (30 ms) for a key press - this is required to refresh the image in our window
