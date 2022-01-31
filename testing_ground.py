@@ -21,7 +21,32 @@ class Object:
     y_end = 0
 
 
-img_org = cv2.imread("data/02.jpg", cv2.IMREAD_COLOR)
+
+
+def look_for_gap(list, var, start_x, max_value, min_value,repetition_list):
+    if not var > len(list[:]) - 2:
+        if   2 > list[var+1][0] - list[var][0]:
+            if var > len(list[:]) - 2:
+                return [start_x, list[var][0], min_value, max_value]
+            range_a = range(list[var][1]-30, list[var][2]+30)
+            range_b = range(list[var + 1][1]-40, list[var + 1][2]+40)
+
+            if ((list[var][1] in range_b) or (list[var][2] in range_b) or (list[var + 1][1] in range_a) or (
+                    list[var + 1][2] in range_a)):
+                if list[var][1] < min_value:
+                    min_value = list[var][1]
+                if list[var][2] > max_value:
+                    max_value = list[var][2]
+                return look_for_gap(list, var + 1, start_x, max_value, min_value)
+            else:
+                return [start_x, list[var][0], min_value, max_value,var]
+        else:
+            return [start_x, list[var][0], min_value, max_value,var]
+    else:
+        return [start_x, list[var][0], min_value, max_value, var]
+
+
+img_org = cv2.imread("data/00.jpg", cv2.IMREAD_COLOR)
 scale = 0.2
 size_of_view = (int(img_org.shape[1] * scale), int(img_org.shape[0] * scale))
 img_org = cv2.resize(img_org, dsize=size_of_view)
@@ -70,12 +95,12 @@ rgb_mod2 = cv2.bitwise_and(img_show[:, :, 1], gray_mask)
 rgb_mod3 = cv2.bitwise_and(img_show[:, :, 2], gray_mask)
 
 rgb_masked = np.dstack((rgb_mod1, rgb_mod2, rgb_mod3))
-
+#
 temp = 1
-
 start_y = 0
 end_y = 0
 list_y = []
+pr = False
 for x_cord in range(gray_mask.shape[0]):
     for y_cord in range(gray_mask.shape[1]):
         if gray_mask[x_cord, y_cord] == 255:
@@ -89,12 +114,10 @@ for x_cord in range(gray_mask.shape[0]):
             temp = 1
     temp = 1
 
-
 list_x = []
-start_x = 0
 end_x = 0
 temp = 1
-
+temp = 1
 for y_cord in range(gray_mask.shape[1]):
     for x_cord in range(gray_mask.shape[0]):
         if gray_mask[x_cord, y_cord] == 255:
@@ -102,14 +125,91 @@ for y_cord in range(gray_mask.shape[1]):
                 start_x = x_cord
             temp = temp + 1
         else:
-            if temp > 15:
+            if temp > 20:
                 end_x = x_cord - 1
                 list_x.append([y_cord, start_x, end_x])
             temp = 1
     temp = 1
-print(list_x)
-print(list_y)
-list_in_range = []
+
+obj = []
+# test  = look_for_gap(list_y,10,list_y[10][0],0,1000)
+list_collected_x = []
+ind = 1
+for i in range(len(list_x[:])-1):
+    if list_x[i][0] == list_x[i+1][0]:
+        ind += 1
+    else:
+        list_collected_x.append([ind,i - ind+1, list_x[i][0]])
+        ind = 1
+print(len(list_collected_x))
+print(len(list_x))
+
+chce_koniec = 0
+while True:
+
+    for size in range(len(list_x[:])):
+        temp_var = look_for_gap(list_x, size, list_x[size][0], 0, 1000)
+
+        if temp_var[1] - temp_var[0] > 50 and temp_var[3] - temp_var[2] > 50:
+            obj.append(temp_var)
+            del list_x[:obj[-1][4]]
+            break
+
+    chce_koniec +=1
+    if chce_koniec > len(list_x[:]):
+        break
+
+
+
+# for cord in range(list_y):
+#     if
+# print(list_x)
+# print(list_y)
+
+
+# list_collected_y = []
+# ind = 1
+# for i in range(len(list_x[:])-1):
+#     if list_x[i][0] == list_x[i+1][0]:
+#         ind += 1
+#     else:
+#         list_collected_x.append([ind,i - ind+1, list_x[i][0]])
+#         ind = 1
+
+
+# print(list)
+# print(img_org.shape)
+#
+#
+#
+# print(list)
+# for x in range(len(list_y[:])):
+#     cv2.line(rgb_masked, (list_y[x][1], list_y[x][0]), (list_y[x][2], list_y[x][0]), (0, 0, 255), 1)
+#
+for x in range(len(list_x[:])):
+    cv2.line(rgb_masked, (list_x[x][0], list_x[x][1]), (list_x[x][0], list_x[x][2]), (255, 0, 0), 1)
+
+# cv2.line(rgb_masked, (list[0][1], list[0][0]), (list[0][2], list[0][0]), (255, 0, 0), 1)
+
+# for i in range(len(obj[:])):
+#     rgb_masked = cv2.rectangle(rgb_masked, (obj[i][3], obj[i][1]), (obj[i][2], obj[i][0]), (0, 255, 0), 2) # dla y
+
+for i in range(len(obj[:])):
+    rgb_masked = cv2.rectangle(rgb_masked, (obj[i][0], obj[i][2]), (obj[i][1], obj[i][3]), (0, 255, 0), 2)
+
+while key != ord('q'):
+    # Wait a little (30 ms) for a key press - this is required to refresh the image in our window
+
+    cv2.imshow('result', rgb_masked)
+
+    key = cv2.waitKey(30)
+# TODO: Implement detection method.
+
+apple = 0
+banana = 0
+orange = 0
+print("test")
+
 # min_value = 100;
 # max_value = 0;
 # ind = 1
@@ -133,25 +233,6 @@ list_in_range = []
 #         range_b = range(list[r+i][1], list[r+i][2])
 #         print(list[r+l])
 
-
-for x in range(len(list_y[:])):
-    cv2.line(rgb_masked, (list_y[x][1], list_y[x][0]), (list_y[x][2], list_y[x][0]), (0, 0, 255), 1)
-
-for x in range(len(list_x[:])):
-    cv2.line(rgb_masked, (list_x[x][0], list_x[x][1]), (list_x[x][0], list_x[x][2]), (255, 0, 0), 1)
-
-while key != ord('q'):
-    # Wait a little (30 ms) for a key press - this is required to refresh the image in our window
-
-    cv2.imshow('result', rgb_masked)
-
-    key = cv2.waitKey(30)
-# TODO: Implement detection method.
-
-apple = 0
-banana = 0
-orange = 0
-print("test")
 
 '''
 cv2.namedWindow('img_show')
