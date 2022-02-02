@@ -13,7 +13,7 @@ from typing import Dict
 def empty_callback(value):
     pass
 
-img_org = cv2.imread("masks/JABLKO_1.JPG", cv2.IMREAD_COLOR)
+img_org = cv2.imread("data/05.jpg", cv2.IMREAD_COLOR)
 scale = 0.2
 size_of_view = (int(img_org.shape[1] * scale), int(img_org.shape[0] * scale))
 img_org = cv2.resize(img_org, dsize=size_of_view)
@@ -125,7 +125,7 @@ while key != ord('q'):
     # view =  cv2.cvtColor(img_hsv_converted, cv2.COLOR_RGB2GRAY)
     # mask = cv2.bitwise_not(gray_mask)
     gray_mask[gray_mask != 255] = 0
-    gray_mask = cv2.medianBlur(gray_mask, 3)
+    gray_mask = cv2.medianBlur(gray_mask, 31)
 
 
     # img_rgb = cv2.bitwise_or(img_rgb, mask)

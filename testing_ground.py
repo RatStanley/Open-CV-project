@@ -37,8 +37,9 @@ def image_to_contur(H,S,V,path = " ",img_org_ = None):
     img[img != 0] = 255
 
     contur_list, heirachy = cv2.findContours(img, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
-    # print(len(contur_list))
+
     return contur_list, heirachy
+
 
 def contur_compare(counturs_background_, counturs_obj,size):
     dist_list = []
@@ -47,49 +48,86 @@ def contur_compare(counturs_background_, counturs_obj,size):
         print(retval)
         dist_list.append(retval)
 
-    sorted_list = dist_list.copy()
-    sorted_list.sort()  # sorts the list from smallest to largest
+    # sorted_list = dist_list.copy()
+    # sorted_list.sort()  # sorts the list from smallest to largest
     obj_count = []
     rest = []
-    for index in range(len(sorted_list)):
-        if sorted_list[index] < size:
-            ind = dist_list.index(sorted_list[index])
+    for index in range(len(dist_list)):
+        if dist_list[index] < size:
+            ind = dist_list.index(dist_list[index])
             obj_count.append(counturs_background_[ind])
         else:
-            ind = dist_list.index(sorted_list[index])
+            ind = dist_list.index(dist_list[index])
             rest.append(counturs_background_[ind])
     return obj_count,rest
 
 #maski obiektów
-org = cv2.imread("data/00.JPG")
+apple = 0
+banana = 0
+orange = 0
+org = cv2.imread("data/02.JPG")
+# org = cv2.imread("masks/POMA.JPG")
+
 scale = 0.2
 size_of_view = (int(org.shape[1] * scale), int(org.shape[0] * scale))
 org = cv2.resize(org, dsize=size_of_view)
 
-contours_background, heirachy_bacground = image_to_contur(img_org_=org,H=255,S=80,V=215)#H=200,S=100,V=202
+contours_background_banana, heirachy_bacground = image_to_contur(img_org_=org, H=200, S=100, V=215)#H=200,S=100,V=202
 ref_banana, heirachy_banana = image_to_contur(path="masks/BANAN.JPG",H=200,S=100,V=202)
 
+contours_background_orange, heirachy_bacground_orange = image_to_contur(img_org_=org, H=255, S=220, V=255)#H=200,S=100,V=202
 
-ref_orange, heirachy_orange = image_to_contur(path="masks/JABLKO_1.JPG",H=255,S=93,V=207)
+ref_orange, heirachy_orange = image_to_contur(path="masks/BANAN.JPG",H=255,S=210,V=255)
 
 reference_contour_banana = ref_banana[0]
 reference_contour_orange = ref_orange[0]
 
-print(len(contours_background))
-banana_cnts,rest = contur_compare(contours_background,reference_contour_banana,1)
-print(len(rest))
-orange_cnts,rest = contur_compare(rest,reference_contour_orange,0.3)
-print(len(rest))
+banana_cnts,rest_1 = contur_compare(contours_background_banana, reference_contour_banana, 1)
+orange_cnts,rest_orange = contur_compare(contours_background_orange,reference_contour_orange,0.3)
 
+
+
+banana = len(banana_cnts)
+orange = len(orange_cnts)
 
 with_contours = cv2.drawContours(org,banana_cnts,-1,(255,0,0),3)
-with_contours = cv2.drawContours(org,orange_cnts,-1,(0,255,0),3)
+with_contours = cv2.drawContours(org,orange_cnts,-1,(0,255,255),3)
+
+orange_rect = []
+for rest in orange_cnts:
+    x,y,w,h = cv2.boundingRect(rest)
+    orange_rect.append([x,y,w,h])
+    cv2.rectangle(with_contours,(x,y),(x+w,y+h),(255,255,0),2)
 
 
+for rest in rest_1:
+    # for cord in orange_rect:
+
+
+    x, y, w, h = cv2.boundingRect(rest)
+    if len(rest) > 100:
+        # print(len(rest))
+        if len(orange_cnts) > 0:
+            is_in_oragne = False
+            for cord in orange_rect:
+                px1, py1, px2, py2 = x, y, x+w, y+h
+                hx1, hy1, hx2, hy2 = cord[0], cord[1], cord[0]+cord[2], cord[1]+cord[3]
+                # px1, py1, px2, py2 = cord[0], cord[1], cord[0] + cord[2], cord[1] + cord[3]
+                # hx1, hy1, hx2, hy2 = x, y, x + w, y + h
+                if   (hx1 >= px1 and hy1 >= py1 and hx2 <= px2 and hy2 <= py2):
+                    is_in_oragne = True
+                    break
+
+            if not is_in_oragne:
+                cv2.rectangle(with_contours,(x,y),(x+w,y+h),(0,255,0),2)
+                apple = apple + 1
+        else:
+            cv2.rectangle(with_contours, (x, y), (x + w, y + h), (0, 255, 0), 1)
+            apple += 1
 # with_contours = cv2.drawContours(org,rest,-1,(255,255,0),3)
-
+print(banana,orange,apple)
 while key != ord('q'):
-    # cv2.imshow('result', gray_mask)
-    cv2.imshow('result', with_contours)
+    cv2.imshow('result', org)
+    # cv2.imshow('result', with_contours)
     key = cv2.waitKey(30)
 # TODO: Implement detection method.
