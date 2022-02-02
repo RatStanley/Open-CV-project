@@ -1,22 +1,15 @@
 import cv2
-import json
-import click
 import copy
-from glob import glob
-
 import numpy as np
-from tqdm import tqdm
-
-from typing import Dict
 
 
 def empty_callback(value):
     pass
 
-img_org = cv2.imread("masks/POMA.JPG", cv2.IMREAD_COLOR)
+img_org = cv2.imread("data/00.jpg", cv2.IMREAD_COLOR)
 scale = 0.2
 size_of_view = (int(img_org.shape[1] * scale), int(img_org.shape[0] * scale))
-# img_org = cv2.resize(img_org, dsize=size_of_view)
+img_org = cv2.resize(img_org, dsize=size_of_view)
 
 img_show = img_org[:]
 img_rgb = img_org.copy()  # np.zeros(img_show.shape)
@@ -122,7 +115,7 @@ while key != ord('q'):
     gray_mask = cv2.bitwise_and(gray_mask_rgb, gray_mask_hsv)
     # gray = cv2.cvtColor(gray, cv2.COLOR_RGB2GRAY)
 
-    # view =  cv2.cvtColor(img_hsv_converted, cv2.COLOR_RGB2GRAY)
+    view =  cv2.cvtColor(img_hsv_converted, cv2.COLOR_RGB2GRAY)
     # mask = cv2.bitwise_not(gray_mask)
     gray_mask[gray_mask != 255] = 0
     gray_mask = cv2.medianBlur(gray_mask, 31)
@@ -133,7 +126,7 @@ while key != ord('q'):
 
     img = np.hstack((img, img_hsv_converted))
     # cv2.imshow('result', img_rgb)
-    cv2.imshow('img_show', gray_mask)
+    cv2.imshow('img_show', view)
 
     key = cv2.waitKey(30)
 # TODO: Implement detection method.

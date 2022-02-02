@@ -6,9 +6,10 @@ from glob import glob
 from tqdm import tqdm
 
 from typing import Dict
+import numpy as np
 
 
-def image_to_contur(H, S, V, path=" ", img_org_=None):
+def image_to_contur(H,S,V,path = " ",img_org_ = None):
     if not path == " ":
         img = cv2.imread(path)
     else:
@@ -19,12 +20,13 @@ def image_to_contur(H, S, V, path=" ", img_org_=None):
     H_Orgin = img[:, :, 0]
     S_Orgin = img[:, :, 1]
     V_Orgin = img[:, :, 2]
-    ret, H_value = cv2.threshold(H_Orgin, H, 255, cv2.THRESH_BINARY)  # 220
-    ret, S_value = cv2.threshold(S_Orgin, S, 255, cv2.THRESH_BINARY)  # 100 # 104
-    ret, V_value = cv2.threshold(V_Orgin, V, 255, cv2.THRESH_BINARY)  # 202
+    ret, H_value = cv2.threshold(H_Orgin, H, 255, cv2.THRESH_BINARY)
+    ret, S_value = cv2.threshold(S_Orgin, S, 255, cv2.THRESH_BINARY)
+    ret, V_value = cv2.threshold(V_Orgin, V, 255, cv2.THRESH_BINARY)
     img[:, :, 0] = H_value
     img[:, :, 1] = S_value
     img[:, :, 2] = V_value
+
 
     img = cv2.medianBlur(img, 31)
 
@@ -32,31 +34,29 @@ def image_to_contur(H, S, V, path=" ", img_org_=None):
     img[img != 0] = 255
 
     contur_list, heirachy = cv2.findContours(img, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
-    # print(len(contur_list))
-    return contur_list, heirachy
+
+    return contur_list, heirachy, img
 
 
-def contur_compare(counturs_background_, counturs_obj, size):
-    dist_list = []
-    for cnt in counturs_background_:
-        retval = cv2.matchShapes(cnt, counturs_obj, 1, 0)
-        # print(retval)
-        dist_list.append(retval)
 
-    sorted_list = dist_list.copy()
-    sorted_list.sort()  # sorts the list from smallest to largest
-    obj_count = []
-    rest = []
-    for index in range(len(sorted_list)):
-        if sorted_list[index] < size:
-            ind = dist_list.index(sorted_list[index])
-            if len(counturs_background_[ind]) > 100:
-                obj_count.append(counturs_background_[ind])
-            # obj_count.append(counturs_background_[ind])
-        else:
-            ind = dist_list.index(sorted_list[index])
-            rest.append(counturs_background_[ind])
-    return obj_count, rest
+def color_rec(img):
+    median_B = np.median(img[:, :, 0])
+    median_G = np.median(img[:, :, 1])
+    median_R = np.median(img[:, :, 2])
+    # print( " " ,median_B," ",median_G," ",median_R)
+
+    if median_B < 1 and median_G < 1 and median_R < 1:
+        # print("banana", " ")
+        return "banana"
+    if median_B < 25 and median_B > 10 and median_G < 120 and median_G > 65  and median_R < 200 and median_R > 155:
+        # print("orange", " ")
+        return "orange"
+    if median_B < 50 and median_B > 15 and median_G < 100 and median_G > 20 and median_R < 160  and median_R > 50:
+        # print("apple", " ")
+        return "apple"
+
+    return
+
 
 
 def detect_fruits(img_path: str) -> Dict[str, int]:
@@ -73,65 +73,34 @@ def detect_fruits(img_path: str) -> Dict[str, int]:
         Dictionary with quantity of each fruit.
     """
     # img = cv2.imread(img_path, cv2.IMREAD_COLOR)
+
     apple = 0
     banana = 0
     orange = 0
     org = cv2.imread(img_path)
-    # org = cv2.imread("masks/POMA.JPG")
 
     scale = 0.2
     size_of_view = (int(org.shape[1] * scale), int(org.shape[0] * scale))
     org = cv2.resize(org, dsize=size_of_view)
 
-    contours_background_banana, heirachy_bacground = image_to_contur(img_org_=org, H=200, S=100,
-                                                                     V=215)  # H=200,S=100,V=202
-    ref_banana, heirachy_banana = image_to_contur(path="masks/BANAN.JPG", H=200, S=102, V=210)
+    contours, heirachy_bacground, mask = image_to_contur(img_org_=org, H=146, S=104, V=218)  # H=200,S=100,V=202
+    img = cv2.bitwise_and(org, org, mask=mask)
 
-    contours_background_orange, heirachy_bacground_orange = image_to_contur(img_org_=org, H=255, S=210, V=235)  # H=200,S=100,V=202
+    good_ctr = []
+    for ctr in contours:
+        if len(ctr) > 100:
+            good_ctr.append(ctr)
 
-    ref_orange, heirachy_orange = image_to_contur(path="masks/POMA.JPG", H=220,S=142,V=239)
-
-    reference_contour_banana = ref_banana[0]
-    reference_contour_orange = ref_orange[0]
-
-    banana_cnts, rest_1 = contur_compare(contours_background_banana, reference_contour_banana, 1)
-    orange_cnts, rest_orange = contur_compare(contours_background_orange, reference_contour_orange, 0.3)
-    # print(len(rest))
-    banana = len(banana_cnts)
-    orange = len(orange_cnts)
-
-    # with_contours = cv2.drawContours(org,banana_cnts,-1,(255,0,0),3)
-    # with_contours = cv2.drawContours(org,orange_cnts,-1,(0,255,255),3)
-
-    orange_rect = []
-    for rest in orange_cnts:
-        x, y, w, h = cv2.boundingRect(rest)
-        orange_rect.append([x, y, w, h])
-        # cv2.rectangle(with_contours,(x,y),(x+w,y+h),(255,255,0),2)
-
-    for rest in rest_1:
-        # for cord in orange_rect:
-
-        x, y, w, h = cv2.boundingRect(rest)
-        if len(rest) > 100:
-            # print(len(rest))
-            if len(orange_cnts) > 0:
-                is_in_oragne = False
-                for cord in orange_rect:
-                    px1, py1, px2, py2 = x, y, x + w, y + h
-                    hx1, hy1, hx2, hy2 = cord[0], cord[1], cord[0] + cord[2], cord[1] + cord[3]
-                    # px1, py1, px2, py2 = cord[0], cord[1], cord[0] + cord[2], cord[1] + cord[3]
-                    # hx1, hy1, hx2, hy2 = x, y, x + w, y + h
-                    if (hx1 >= px1 and hy1 >= py1 and hx2 <= px2 and hy2 <= py2):
-                        is_in_oragne = True
-                        break
-
-                if not is_in_oragne:
-                    # cv2.rectangle(with_contours,(x,y),(x+w,y+h),(0,255,0),2)
-                    apple = apple + 1
-            else:
-                # cv2.rectangle(with_contours, (x, y), (x + w, y + h), (0, 255, 0), 1)
-                apple += 1
+    for crt in good_ctr:
+        x, y, w, h = cv2.boundingRect(crt)
+        temp_image = img[y:y + h, x:x + w]
+        temp_obj = color_rec(temp_image)
+        if temp_obj == "banana":
+            banana += 1
+        if temp_obj == "orange":
+            orange += 1
+        if temp_obj == "apple":
+            apple += 1
 
 
 

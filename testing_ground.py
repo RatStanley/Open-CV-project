@@ -68,7 +68,6 @@ apple = 0
 banana = 0
 orange = 0
 org = cv2.imread("data/05.JPG")
-# org = cv2.imread("masks/POMA.JPG")
 
 scale = 0.2
 size_of_view = (int(org.shape[1] * scale), int(org.shape[0] * scale))
@@ -87,8 +86,7 @@ reference_contour_orange = ref_orange[0]
 banana_cnts,rest_1 = contur_compare(contours_background_banana, reference_contour_banana, 1)
 orange_cnts,rest_orange = contur_compare(contours_background_orange,reference_contour_orange,0.3)
 
-
-
+np.save('file_name.txt', ref_banana)
 
 
 banana = len(banana_cnts)
