@@ -50,7 +50,9 @@ def contur_compare(counturs_background_, counturs_obj, size):
     for index in range(len(sorted_list)):
         if sorted_list[index] < size:
             ind = dist_list.index(sorted_list[index])
-            obj_count.append(counturs_background_[ind])
+            if len(counturs_background_[ind]) > 100:
+                obj_count.append(counturs_background_[ind])
+            # obj_count.append(counturs_background_[ind])
         else:
             ind = dist_list.index(sorted_list[index])
             rest.append(counturs_background_[ind])
@@ -83,12 +85,11 @@ def detect_fruits(img_path: str) -> Dict[str, int]:
 
     contours_background_banana, heirachy_bacground = image_to_contur(img_org_=org, H=200, S=100,
                                                                      V=215)  # H=200,S=100,V=202
-    ref_banana, heirachy_banana = image_to_contur(path="masks/BANAN.JPG", H=200, S=100, V=202)
+    ref_banana, heirachy_banana = image_to_contur(path="masks/BANAN.JPG", H=200, S=102, V=210)
 
-    contours_background_orange, heirachy_bacground_orange = image_to_contur(img_org_=org, H=255, S=220,
-                                                                            V=255)  # H=200,S=100,V=202
+    contours_background_orange, heirachy_bacground_orange = image_to_contur(img_org_=org, H=255, S=210, V=235)  # H=200,S=100,V=202
 
-    ref_orange, heirachy_orange = image_to_contur(path="masks/BANAN.JPG", H=255, S=210, V=255)
+    ref_orange, heirachy_orange = image_to_contur(path="masks/POMA.JPG", H=220,S=142,V=239)
 
     reference_contour_banana = ref_banana[0]
     reference_contour_orange = ref_orange[0]

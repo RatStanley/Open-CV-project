@@ -45,7 +45,7 @@ def contur_compare(counturs_background_, counturs_obj,size):
     dist_list = []
     for cnt in counturs_background_:
         retval = cv2.matchShapes(cnt, counturs_obj, 1, 0)
-        print(retval)
+        # print(retval)
         dist_list.append(retval)
 
     # sorted_list = dist_list.copy()
@@ -55,7 +55,9 @@ def contur_compare(counturs_background_, counturs_obj,size):
     for index in range(len(dist_list)):
         if dist_list[index] < size:
             ind = dist_list.index(dist_list[index])
-            obj_count.append(counturs_background_[ind])
+            print(len(counturs_background_[ind]))
+            if len(counturs_background_[ind]) > 100:
+                obj_count.append(counturs_background_[ind])
         else:
             ind = dist_list.index(dist_list[index])
             rest.append(counturs_background_[ind])
@@ -65,7 +67,7 @@ def contur_compare(counturs_background_, counturs_obj,size):
 apple = 0
 banana = 0
 orange = 0
-org = cv2.imread("data/02.JPG")
+org = cv2.imread("data/05.JPG")
 # org = cv2.imread("masks/POMA.JPG")
 
 scale = 0.2
@@ -73,11 +75,11 @@ size_of_view = (int(org.shape[1] * scale), int(org.shape[0] * scale))
 org = cv2.resize(org, dsize=size_of_view)
 
 contours_background_banana, heirachy_bacground = image_to_contur(img_org_=org, H=200, S=100, V=215)#H=200,S=100,V=202
-ref_banana, heirachy_banana = image_to_contur(path="masks/BANAN.JPG",H=200,S=100,V=202)
+ref_banana, heirachy_banana = image_to_contur(path="masks/BANAN.JPG",H=200,S=102,V=210)
 
-contours_background_orange, heirachy_bacground_orange = image_to_contur(img_org_=org, H=255, S=220, V=255)#H=200,S=100,V=202
+contours_background_orange, heirachy_bacground_orange = image_to_contur(img_org_=org, H=255, S=210, V=235)#H=255, S=220, V=255
 
-ref_orange, heirachy_orange = image_to_contur(path="masks/BANAN.JPG",H=255,S=210,V=255)
+ref_orange, heirachy_orange = image_to_contur(path="masks/POMA.JPG",H=220,S=142,V=239)#,H=255,S=210,V=255
 
 reference_contour_banana = ref_banana[0]
 reference_contour_orange = ref_orange[0]
@@ -87,8 +89,11 @@ orange_cnts,rest_orange = contur_compare(contours_background_orange,reference_co
 
 
 
+
+
 banana = len(banana_cnts)
 orange = len(orange_cnts)
+print(len(orange_cnts))
 
 with_contours = cv2.drawContours(org,banana_cnts,-1,(255,0,0),3)
 with_contours = cv2.drawContours(org,orange_cnts,-1,(0,255,255),3)

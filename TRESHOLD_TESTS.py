@@ -13,10 +13,10 @@ from typing import Dict
 def empty_callback(value):
     pass
 
-img_org = cv2.imread("data/05.jpg", cv2.IMREAD_COLOR)
+img_org = cv2.imread("masks/POMA.JPG", cv2.IMREAD_COLOR)
 scale = 0.2
 size_of_view = (int(img_org.shape[1] * scale), int(img_org.shape[0] * scale))
-img_org = cv2.resize(img_org, dsize=size_of_view)
+# img_org = cv2.resize(img_org, dsize=size_of_view)
 
 img_show = img_org[:]
 img_rgb = img_org.copy()  # np.zeros(img_show.shape)
