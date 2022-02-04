@@ -2,11 +2,16 @@ import cv2
 import json
 import click
 
+from pathlib import Path
 from glob import glob
 from tqdm import tqdm
 
 from typing import Dict
+
+
 import numpy as np
+
+
 
 
 def image_to_contur(H,S,V,path = " ",img_org_ = None):
@@ -114,21 +119,18 @@ def detect_fruits(img_path: str) -> Dict[str, int]:
 
 
 @click.command()
-@click.option('-p', '--data_path', help='Path to data directory')
-@click.option('-o', '--output_file_path', help='Path to output file')
-def main(data_path, output_file_path):
-    data_path = "data"
-    output_file_path = "out"
-    img_list = glob(f'{data_path}/*.jpg')
+@click.option('-p', '--data_path', help='Path to data directory', type=click.Path(exists=True, file_okay=False,
+                                                                                  path_type=Path), required=True)
+@click.option('-o', '--output_file_path', help='Path to output file', type=click.Path(dir_okay=False, path_type=Path),
+              required=True)
+def main(data_path: Path, output_file_path: Path):
+    img_list = data_path.glob('*.jpg')
 
     results = {}
 
     for img_path in tqdm(sorted(img_list)):
-        fruits = detect_fruits(img_path)
-
-        filename = img_path.split('/')[-1]
-
-        results[filename] = fruits
+        fruits = detect_fruits(str(img_path))
+        results[img_path.name] = fruits
 
     with open(output_file_path, 'w') as ofp:
         json.dump(results, ofp)

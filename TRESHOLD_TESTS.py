@@ -15,7 +15,7 @@ img_show = img_org[:]
 img_rgb = img_org.copy()  # np.zeros(img_show.shape)
 
 img_hsv = cv2.cvtColor(img_org, cv2.COLOR_BGR2HSV)
-
+img_hsv = cv2.medianBlur(img_hsv, 31)
 img_show = copy.deepcopy(img_org)
 img_hsv_converted = copy.deepcopy(img_hsv)
 
@@ -53,31 +53,7 @@ ret, H_value = cv2.threshold(H_Orgin, 167, 255, cv2.THRESH_BINARY)
 ret, S_value = cv2.threshold(S_Orgin, 104, 255, cv2.THRESH_BINARY)
 ret, V_value = cv2.threshold(V_Orgin, 211, 255, cv2.THRESH_BINARY)
 
-# img_hsv_converted[:, :, 0] = H_value
-# img_hsv_converted[:, :, 1] = S_value
-# img_hsv_converted[:, :, 2] = V_value
-# # print(img_hsv_converted.shape)
-#
-#
-# gray_mask = cv2.bitwise_or(gray, H_value)
-# gray_mask = cv2.bitwise_or(gray_mask, S_value)
-# gray_mask = cv2.bitwise_or(gray_mask, V_value)
-# gray_mask[gray_mask != 255] = 0
-#
 rgb_mod = np.zeros(img_show.shape)
-# rgb_mod1 = cv2.bitwise_and(img_show[:, :, 0], gray_mask)
-# rgb_mod2 = cv2.bitwise_and(img_show[:, :, 1], gray_mask)
-# rgb_mod3 = cv2.bitwise_and(img_show[:, :, 2], gray_mask)
-
-# rgb_masked = np.dstack((rgb_mod1, rgb_mod2, rgb_mod3))
-# x = 0
-# print(rgb_masked.shape)
-#
-# print(gray_mask.shape)
-#
-# while x != 1:
-#     cv2.imshow('img_show', rgb_masked)
-#     key = cv2.waitKey(30)
 
 while key != ord('q'):
     # Wait a little (30 ms) for a key press - this is required to refresh the image in our window
@@ -97,13 +73,6 @@ while key != ord('q'):
     ret, B_value = cv2.threshold(B_Orgin, B, 255, cv2.THRESH_BINARY)
 
 
-    # img_hsv_converted[:, :, 0] = H_value
-    # img_hsv_converted[:, :, 1] = S_value
-    # img_hsv_converted[:, :, 2] = V_value
-    #
-    # img_rgb[:, :, 0] = H_value
-    # img_rgb[:, :, 1] = S_value
-    # img_rgb[:, :, 2] = V_value
 
     gray_mask_hsv = cv2.bitwise_or(gray, H_value)
     gray_mask_hsv = cv2.bitwise_or(gray_mask_hsv, S_value)
@@ -126,7 +95,7 @@ while key != ord('q'):
 
     img = np.hstack((img, img_hsv_converted))
     # cv2.imshow('result', img_rgb)
-    cv2.imshow('img_show', view)
+    cv2.imshow('img_show', gray_mask)
 
     key = cv2.waitKey(30)
 # TODO: Implement detection method.
